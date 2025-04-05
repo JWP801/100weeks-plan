@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>100주차 플랜 보드</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .board {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 10px;
+      padding: 10px;
+    }
+    .week-column {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 200px;
+      min-height: 300px;
+      padding: 10px;
+      flex-shrink: 0;
+    }
+    .week-column h3 {
+      margin-top: 0;
+      font-size: 1rem;
+      text-align: center;
+    }
+    .task {
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 4px;
+      padding: 5px;
+      margin-bottom: 8px;
+      cursor: grab;
+    }
+    .input-box {
+      text-align: center;
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      padding: 5px;
+      width: 200px;
+    }
+    button {
+      padding: 6px 12px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>100주차 플랜</h1>
+  <div class="board" id="board">
+    <!-- 100주차까지 자동 생성 -->
+  </div>
+
+  <div class="input-box">
+    <input type="text" id="taskInput" placeholder="할 일 입력" />
+    <select id="weekSelect"></select>
+    <button onclick="addTask()">할 일 추가</button>
+  </div>
+
+  <script>
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text");
+      const task = document.getElementById(data);
+      const column = ev.target.closest(".week-column");
+      column.appendChild(task);
+    }
+
+    let taskCount = 0;
+    function addTask() {
+      const text = document.getElementById("taskInput").value;
+      const week = document.getElementById("weekSelect").value;
+      if (!text || !week) return;
+
+      const task = document.createElement("div");
+      task.className = "task";
+      task.id = "task-" + taskCount++;
+      task.draggable = true;
+      task.ondragstart = drag;
+      task.innerText = text;
+
+      document.getElementById("week-" + week).appendChild(task);
+      document.getElementById("taskInput").value = "";
+    }
+
+    function generateWeeks() {
+      const board = document.getElementById("board");
+      const select = document.getElementById("weekSelect");
+      for (let i = 1; i <= 100; i++) {
+        const column = document.createElement("div");
+        column.className = "week-column";
+        column.id = `week-${i}`;
+        column.ondrop = drop;
+        column.ondragover = allowDrop;
+
+        const title = document.createElement("h3");
+        title.innerText = `Week ${i}`;
+        column.appendChild(title);
+
+        board.appendChild(column);
+
+        const option = document.createElement("option");
+        option.value = i;
+        option.innerText = `Week ${i}`;
+        select.appendChild(option);
+      }
+    }
+
+    window.onload = generateWeeks;
+  </script>
+
+</body>
+</html>
